@@ -60,6 +60,7 @@ public class User {
         this.username = username;
         this.name = name;
         this.password = password;
+        this.roles = new HashSet<>();
     }
 
     @Override
