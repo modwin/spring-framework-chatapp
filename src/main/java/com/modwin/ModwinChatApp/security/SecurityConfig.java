@@ -41,24 +41,24 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/users/**", "/", "/home.html", "/register.html", "/login/auth",
-                                "/css/**", "/favicon.ico", "/oauth2/**", "/terms-and-conditions.html",
+                                "/api/users/**", "/", "/home", "/register", "/login/auth",
+                                "/css/**", "/favicon.ico", "/oauth2/**", "/terms-and-conditions",
                                 "/h2-console", "/error", "/api/users/register"
                         ).permitAll()
-                        .requestMatchers("/profile.html", "/api/users/addFriend","/api/users/removeFriend").authenticated()
+                        .requestMatchers("/profile", "/api/users/addFriend","/api/users/removeFriend").authenticated()
                         .anyRequest().permitAll()
                 )
                 .formLogin(login -> login
-                        .loginPage("/login.html").permitAll()
-                        .defaultSuccessUrl("/profile.html"))
+                        .loginPage("/login").permitAll()
+                        .defaultSuccessUrl("/profile"))
 
                 .oauth2Login(oauth -> oauth
-                        .defaultSuccessUrl("/profile.html")
+                        .defaultSuccessUrl("/profile")
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(customOidcUserService))
                 )
                 .logout(logoutAction -> logoutAction
                         .logoutUrl("/api/users/logout")
-                        .logoutSuccessUrl("/home.html").permitAll()
+                        .logoutSuccessUrl("/").permitAll()
                         .invalidateHttpSession(true))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
