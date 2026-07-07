@@ -34,3 +34,5 @@ build/
 .vscode/
 AGENTS.md
 /docs
+/docs/
+/docker-compose.yml
