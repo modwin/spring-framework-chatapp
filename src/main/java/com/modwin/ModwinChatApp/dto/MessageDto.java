@@ -1,21 +1,19 @@
 package com.modwin.ModwinChatApp.dto;
 
-import com.modwin.ModwinChatApp.persistence.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDateTime;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ChatDto {
+public class MessageDto {
     private Integer ID;
-    private Set<User> users;
-    private List<MessageDto> chatMessages;
-    private UserDto owner;
+    private ChatDto chat;
+    private String text;
+    private LocalDateTime published;
 }
