@@ -32,13 +32,6 @@ A full-stack, containerized web application built with **Spring Boot**, **React*
 
 ## Architecture
 
-```
-┌─────────────┐      /api, /oauth2, /login      ┌──────────────────┐      ┌────────────┐
-│  React SPA   │ ───────────────────────────────▶│  Spring Boot API │─────▶│ PostgreSQL │
-│ (Nginx-served)│◀───────────────────────────────│   (Spring Security)     └────────────┘
-└─────────────┘                                  └──────────────────┘
-```
-
 - The React frontend is built and served as static assets via Nginx, which reverse-proxies `/api`, `/oauth2`, and `/login` through to the Spring Boot backend (see `nginx.conf`).
 - The backend exposes REST endpoints under `/api/users/**` and handles both local and OAuth2/OIDC authentication through a single Spring Security filter chain.
 - PostgreSQL persists `User`, `Role`, `Chat`, and `Message` entities. The `Chat`/`Message` tables exist but aren't yet wired to any endpoint.
