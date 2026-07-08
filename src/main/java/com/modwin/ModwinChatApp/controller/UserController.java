@@ -168,7 +168,7 @@ public class UserController {
     }
 
     @GetMapping("/getUser/username/{username}")
-    public ResponseEntity<User> getUserByUsername(@PathVariable @Valid String username) {
+    public ResponseEntity<UserDto> getUserByUsername(@PathVariable @Valid String username) {
         UserDto u = userService.getUserDTOByUsername(username);
         if (u == null) {
             throw new UserNotFoundException("No registered user with that username.");
@@ -177,12 +177,12 @@ public class UserController {
     }
 
     @GetMapping(path = "/getUser/id/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable @Valid Integer id) {
+    public ResponseEntity<UserDto> getUserById(@PathVariable @Valid Integer id) {
         UserDto u = userService.getUserDTOById(id);
         if (u == null) {
             throw new UserNotFoundException("No registered user with that id.");
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(u);
     }
 
     @GetMapping(path = "/allUsers")
