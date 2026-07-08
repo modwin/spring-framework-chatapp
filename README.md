@@ -1,4 +1,4 @@
-# ModwinChat
+# Spring Boot framework - modwin chatapp
 
 A full-stack, containerized web application built with **Spring Boot**, **React**, and **PostgreSQL** — demonstrating dual-mode authentication (local + Google OAuth2/OIDC), a JPA-modeled friends network, and a production-style Docker/Nginx deployment topology.
 
