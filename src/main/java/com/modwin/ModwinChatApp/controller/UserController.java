@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -170,24 +171,19 @@ public class UserController {
     @GetMapping("/getUser/username/{username}")
     public ResponseEntity<UserDto> getUserByUsername(@PathVariable @Valid String username) {
         UserDto u = userService.getUserDTOByUsername(username);
-        if (u == null) {
-            throw new UserNotFoundException("No registered user with that username.");
-        }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(u);
     }
 
     @GetMapping(path = "/getUser/id/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable @Valid Integer id) {
         UserDto u = userService.getUserDTOById(id);
-        if (u == null) {
-            throw new UserNotFoundException("No registered user with that id.");
-        }
         return ResponseEntity.ok(u);
     }
 
     @GetMapping(path = "/allUsers")
-    public ResponseEntity<Iterable<User>> getUsers() {
-        return ResponseEntity.ok(userService.getUsers());
+    public ResponseEntity<Iterable<UserDto>> getUsers() {
+         List<UserDto> users = userService.getUsers().stream().map(UserMapper::toDTO).collect(Collectors.toList());
+        return ResponseEntity.ok(users);
     }
 
 
