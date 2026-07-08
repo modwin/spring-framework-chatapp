@@ -16,14 +16,15 @@ public class Chat {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="user_id",unique = true, nullable = false)
+    @Column(name="chat_id",unique = true, nullable = false)
     private Integer ID;
 
     private Set<User> users;
 
-    private List<Message> chatMessages;
+    @OneToMany
+    private List<Message> messages;
 
     @ManyToOne
-    @JoinColumn(name = "owner_user_id")
+    @JoinColumn(name = "owner_id")
     private User owner;
 }
