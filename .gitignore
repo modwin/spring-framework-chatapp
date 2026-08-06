@@ -18,7 +18,7 @@ target/
 *.iws
 *.iml
 *.ipr
-src/main/resources/application.properties
+src/main/resources/application.**
 
 ### NetBeans ###
 /nbproject/private/
@@ -33,6 +33,7 @@ build/
 ### VS Code ###
 .vscode/
 AGENTS.md
+/CONTEXT_GUIDE.md
 /docs
 /docs/
 /docker-compose.yml
