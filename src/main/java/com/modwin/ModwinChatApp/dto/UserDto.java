@@ -42,6 +42,7 @@ public class UserDto {
     private String password;
 
     @Builder.Default
+    @ToString.Exclude
     private Set<UserDto> friends = new HashSet<>();
 
     public UserDto(@NonNull String email, @NonNull String username, @NonNull String name, String password) {
