@@ -5,6 +5,7 @@ import com.modwin.ModwinChatApp.persistence.model.Chat;
 import com.modwin.ModwinChatApp.persistence.model.Message;
 import com.modwin.ModwinChatApp.persistence.repository.ChatRepository;
 import com.modwin.ModwinChatApp.persistence.repository.MessageRepository;
+import com.modwin.ModwinChatApp.persistence.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -18,19 +19,18 @@ public class ChatService {
 
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
+    private final UserRepository userRepository;
 
-    public ChatService(ChatRepository chatRepository, MessageRepository messageRepository) {
+    public ChatService(ChatRepository chatRepository, MessageRepository messageRepository, UserRepository userRepository) {
         this.chatRepository = chatRepository;
         this.messageRepository = messageRepository;
+        this.userRepository = userRepository;
     }
-
 
     public ChatDto getChatById(Integer id) throws Exception {
         Optional<Chat> chat = chatRepository.findById(id);
         if(chat.isEmpty()) throw new Exception();
         Principal authPrincipal = SecurityContextHolder.getContext().getAuthentication();
-
-
         return null;
     }
 
@@ -45,7 +45,4 @@ public class ChatService {
 
     }
 
-    public void saveChatMessages(ChatDto chatDto) {
-
-    }
 }

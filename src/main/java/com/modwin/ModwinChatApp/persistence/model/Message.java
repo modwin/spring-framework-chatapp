@@ -18,16 +18,16 @@ public class Message {
     @ManyToOne
     private Chat chat;
 
-    @ManyToAny(fetch = FetchType.LAZY)
+    @Column(nullable = false, length = 4000)
     private String content;
 
+    @Column
     private LocalDateTime sentAt;
+    @Column
     private LocalDateTime lastEdit;
 
-    @Getter
-    @Setter
-    @OneToOne
-    @JoinColumn(name = "sender_user_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "sender_user_id", nullable = false)
     private User sender;
 
 
