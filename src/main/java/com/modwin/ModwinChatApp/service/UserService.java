@@ -57,7 +57,7 @@ public class UserService extends DefaultOAuth2UserService {
         if(optionalUser.isEmpty()){
             validateUserDTO(userDto);
             checkUsernameAvailability(userDto);
-            User u = new User(userDto.getEmail(), userDto.getUsername(), userDto.getName(), passwordEncoder.encode(userDto.getPassword()), new ArrayList<>());
+            User u = new User(userDto.getEmail(), userDto.getUsername(), userDto.getName(), passwordEncoder.encode(userDto.getPassword()), new HashSet<>());
             return userRepository.save(addDefaultRoleToUser(u));
         }
         throw new UserAlreadyExistsException("User already exists");
@@ -70,7 +70,7 @@ public class UserService extends DefaultOAuth2UserService {
         String email = oAuth2User.getAttribute("email");
 
         if (email != null && userRepository.findByEmail(email).isEmpty()) {
-            User newUser = new User(email, oAuth2User.getName(), oAuth2User.getName(), passwordEncoder.encode(UUID.randomUUID().toString()), new ArrayList<>());
+            User newUser = new User(email, oAuth2User.getName(), oAuth2User.getName(), passwordEncoder.encode(UUID.randomUUID().toString()), new HashSet<>());
             newUser.getRoles().add(getOrCreateDefaultRole());
             userRepository.save(newUser);
         }
@@ -188,19 +188,6 @@ public class UserService extends DefaultOAuth2UserService {
     private Role getOrCreateDefaultRole() {
         return roleRepository.findByName("USER")
                 .orElseGet(() -> roleRepository.save(new Role("USER")));
-    }
-
-    public void loginUser(HttpServletRequest request, String username, String password){
-
-        UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(username, password, getUserAuthorities(UserMapper.toEntity(getUserDTOByUsername(username))));
-        Authentication auth = authenticationManager.authenticate(authReq);
-
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        securityContext.setAuthentication(auth);
-
-        HttpSession session = request.getSession(true);
-        session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, securityContext);
-
     }
 
 }
