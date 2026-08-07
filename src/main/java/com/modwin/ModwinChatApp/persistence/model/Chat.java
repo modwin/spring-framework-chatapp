@@ -17,7 +17,7 @@ public class Chat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="chat_id",unique = true, nullable = false)
-    private Integer ID;
+    private Integer id;
 
     @ManyToMany
     private Set<User> users;

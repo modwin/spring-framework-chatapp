@@ -1,9 +1,6 @@
 package com.modwin.ModwinChatApp.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -11,9 +8,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Data
 public class MessageDto {
     private Integer ID;
     private ChatDto chat;
-    private String text;
+    private String content;
     private LocalDateTime published;
+    private UserDto sender;
 }

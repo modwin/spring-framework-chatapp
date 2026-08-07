@@ -1,6 +1,9 @@
 package com.modwin.ModwinChatApp.persistence.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.ManyToAny;
 
 import java.time.LocalDateTime;
 
@@ -15,8 +18,17 @@ public class Message {
     @ManyToOne
     private Chat chat;
 
-    private String text;
+    @ManyToAny(fetch = FetchType.LAZY)
+    private String content;
 
-    private LocalDateTime published;
+    private LocalDateTime sentAt;
+    private LocalDateTime lastEdit;
+
+    @Getter
+    @Setter
+    @OneToOne
+    @JoinColumn(name = "sender_user_id")
+    private User sender;
+
 
 }
