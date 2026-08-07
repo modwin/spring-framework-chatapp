@@ -4,9 +4,11 @@ import com.modwin.ModwinChatApp.dto.ChatDto;
 import com.modwin.ModwinChatApp.persistence.model.Chat;
 import com.modwin.ModwinChatApp.persistence.repository.ChatRepository;
 import com.modwin.ModwinChatApp.persistence.repository.MessageRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
 public class ChatService {
 
     private final ChatRepository chatRepository;

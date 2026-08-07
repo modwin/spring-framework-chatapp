@@ -21,6 +21,7 @@ import java.util.Set;
 public class UserDto {
 
     @NotBlank(message = "Email field is required.")
+    @NonNull
     @Email(message = "Invalid email format.")
     private String email;
 
@@ -41,7 +42,7 @@ public class UserDto {
     private String password;
 
     @Builder.Default
-    private List<UserDto> friends = new ArrayList<>();
+    private Set<UserDto> friends = new HashSet<>();
 
     public UserDto(@NonNull String email, @NonNull String username, @NonNull String name, String password) {
         this.email = email;

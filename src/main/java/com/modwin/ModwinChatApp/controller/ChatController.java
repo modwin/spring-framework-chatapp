@@ -6,7 +6,9 @@ import com.modwin.ModwinChatApp.persistence.repository.ChatRepository;
 import com.modwin.ModwinChatApp.persistence.repository.MessageRepository;
 import com.modwin.ModwinChatApp.service.ChatService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 
+@Controller
 public class ChatController {
 
     // TODO: Add chat business layer logic for sending/receiving messages.

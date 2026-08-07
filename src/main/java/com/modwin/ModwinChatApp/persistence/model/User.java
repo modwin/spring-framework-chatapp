@@ -9,7 +9,7 @@ import java.util.*;
 
 @Getter
 @Setter
-@Entity(name = "USERS")
+@Entity(name = "users")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -42,7 +42,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="user_id",unique = true, nullable = false)
-    private Integer ID;
+    private Integer id;
 
     @Builder.Default
     @ToString.Exclude
@@ -52,9 +52,9 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "friend_id")
     )
-    private List<User> friends = new ArrayList<>();
+    private Set<User> friends = new HashSet<>();
 
-    public User(@NonNull String email, @NonNull String username, @NonNull String name, String password, List<User> friends) {
+    public User(@NonNull String email, @NonNull String username, @NonNull String name, String password, Set<User> friends) {
         this.friends = friends;
         this.email = email;
         this.username = username;
@@ -68,11 +68,11 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(ID, user.ID);
+        return Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ID);
+        return Objects.hash(id);
     }
 }
