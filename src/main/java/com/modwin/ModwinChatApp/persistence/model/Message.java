@@ -15,7 +15,8 @@ public class Message {
     @Column(name="user_id",unique = true, nullable = false)
     private Integer ID;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "chat_id", nullable = false)
     private Chat chat;
 
     @Column(nullable = false, length = 4000)

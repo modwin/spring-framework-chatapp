@@ -3,6 +3,7 @@ package com.modwin.ModwinChatApp.persistence.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -22,8 +23,8 @@ public class Chat {
     @ManyToMany
     private Set<User> users;
 
-    @OneToMany
-    private List<Message> messages;
+    @OneToMany(mappedBy = "chat")
+    private List<Message> messages = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "owner_id")
