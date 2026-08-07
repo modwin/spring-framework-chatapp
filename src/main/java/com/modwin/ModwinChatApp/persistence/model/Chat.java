@@ -19,6 +19,7 @@ public class Chat {
     @Column(name="chat_id",unique = true, nullable = false)
     private Integer ID;
 
+    @ManyToMany
     private Set<User> users;
 
     @OneToMany

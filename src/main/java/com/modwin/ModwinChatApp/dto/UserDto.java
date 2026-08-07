@@ -41,7 +41,7 @@ public class UserDto {
     private String password;
 
     @Builder.Default
-    private List<User> friends = new ArrayList<>();
+    private List<UserDto> friends = new ArrayList<>();
 
     public UserDto(@NonNull String email, @NonNull String username, @NonNull String name, String password) {
         this.email = email;

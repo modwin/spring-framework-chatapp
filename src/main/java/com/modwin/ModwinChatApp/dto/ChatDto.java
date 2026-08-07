@@ -15,7 +15,7 @@ import java.util.Set;
 @ToString
 public class ChatDto {
     private Integer ID;
-    private Set<User> users;
+    private Set<UserDto> users;
     private List<MessageDto> chatMessages;
     private UserDto owner;
 }
