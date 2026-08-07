@@ -44,6 +44,8 @@ public class User {
     @Column(name="user_id",unique = true, nullable = false)
     private Integer id;
 
+
+    // TODO: Add Friendship class to be able to add pending friends requests, blocked status etc.
     @Builder.Default
     @ToString.Exclude
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
@@ -68,7 +70,7 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(id, user.id);
+        return id != null && user.id != null && Objects.equals(id, user.id);
     }
 
     @Override
