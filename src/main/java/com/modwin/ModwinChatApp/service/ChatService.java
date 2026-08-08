@@ -1,8 +1,12 @@
 package com.modwin.ModwinChatApp.service;
 
 import com.modwin.ModwinChatApp.dto.ChatDto;
+import com.modwin.ModwinChatApp.exception.AccessDeniedException;
+import com.modwin.ModwinChatApp.exception.ChatNotFoundException;
+import com.modwin.ModwinChatApp.exception.UserNotFoundException;
 import com.modwin.ModwinChatApp.persistence.model.Chat;
 import com.modwin.ModwinChatApp.persistence.model.Message;
+import com.modwin.ModwinChatApp.persistence.model.User;
 import com.modwin.ModwinChatApp.persistence.repository.ChatRepository;
 import com.modwin.ModwinChatApp.persistence.repository.MessageRepository;
 import com.modwin.ModwinChatApp.persistence.repository.UserRepository;
@@ -14,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -50,7 +55,29 @@ public class ChatService {
     }
 
 
-    public MessageResponse sendMessage(Integer chatId, String name, @Valid SendMessageRequest request) {
-        return null;
+    public MessageResponse sendMessage(
+            Integer chatId,
+            String username,
+            SendMessageRequest request
+    ) {
+        Chat chat = chatRepository.findById(chatId)
+                .orElseThrow(() -> new ChatNotFoundException(chatId));
+
+        User sender = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
+
+        if (!chat.getUsers().contains(sender)) {
+            throw new AccessDeniedException("You are not a member of this chat");
+        }
+
+        Message message = new Message();
+        message.setChat(chat);
+        message.setSender(sender);
+        message.setContent(request.content());
+        message.setSentAt(LocalDateTime.now());
+
+        Message saved = messageRepository.save(message);
+
+        return new MessageResponse(saved.getID(), saved.getContent(), saved.getSentAt());
     }
 }
