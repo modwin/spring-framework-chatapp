@@ -6,6 +6,7 @@ import com.modwin.ModwinChatApp.persistence.model.Message;
 import com.modwin.ModwinChatApp.persistence.repository.ChatRepository;
 import com.modwin.ModwinChatApp.persistence.repository.MessageRepository;
 import com.modwin.ModwinChatApp.persistence.repository.UserRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -44,5 +45,6 @@ public class ChatService {
     public void saveChat(ChatDto chatDto) throws Exception {
 
     }
+
 
 }
