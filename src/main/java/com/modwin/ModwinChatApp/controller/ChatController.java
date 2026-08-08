@@ -2,13 +2,19 @@ package com.modwin.ModwinChatApp.controller;
 
 import com.modwin.ModwinChatApp.dto.ChatDto;
 import com.modwin.ModwinChatApp.dto.MessageDto;
+import com.modwin.ModwinChatApp.promise.MessageResponse;
+import com.modwin.ModwinChatApp.promise.SendMessageRequest;
 import com.modwin.ModwinChatApp.service.ChatService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller("/api/chats")
@@ -39,6 +45,11 @@ public class ChatController {
         boolean hasMessage  = chatDto.getChatMessages().isEmpty();
         if(hasMessage) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(chatDto);
+    }
+
+    @PostMapping("/{chatId}/messages")
+    public ResponseEntity<MessageResponse> sendMessage(@PathVariable Integer chatId, @Valid @RequestBody SendMessageRequest request, Principal principal) {
+        return null;
     }
 
 }

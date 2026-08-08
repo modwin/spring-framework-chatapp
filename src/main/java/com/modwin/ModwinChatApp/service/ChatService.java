@@ -6,6 +6,9 @@ import com.modwin.ModwinChatApp.persistence.model.Message;
 import com.modwin.ModwinChatApp.persistence.repository.ChatRepository;
 import com.modwin.ModwinChatApp.persistence.repository.MessageRepository;
 import com.modwin.ModwinChatApp.persistence.repository.UserRepository;
+import com.modwin.ModwinChatApp.promise.MessageResponse;
+import com.modwin.ModwinChatApp.promise.SendMessageRequest;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -47,4 +50,7 @@ public class ChatService {
     }
 
 
+    public MessageResponse sendMessage(Integer chatId, String name, @Valid SendMessageRequest request) {
+        return null;
+    }
 }
