@@ -49,7 +49,9 @@ public class ChatController {
 
     @PostMapping("/{chatId}/messages")
     public ResponseEntity<MessageResponse> sendMessage(@PathVariable Integer chatId, @Valid @RequestBody SendMessageRequest request, Principal principal) {
-        return null;
+        MessageResponse response =
+                chatService.sendMessage(chatId, principal.getName(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 }
