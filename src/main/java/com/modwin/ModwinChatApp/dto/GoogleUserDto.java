@@ -2,11 +2,11 @@ package com.modwin.ModwinChatApp.dto;
 
 import java.util.Map;
 
-public class GoogleUserData {
+public class GoogleUserDto {
 
     private final Map<String, Object> attributes;
 
-    public GoogleUserData(Map<String, Object> attributes){
+    public GoogleUserDto(Map<String, Object> attributes){
         this.attributes = attributes;
     }
 
