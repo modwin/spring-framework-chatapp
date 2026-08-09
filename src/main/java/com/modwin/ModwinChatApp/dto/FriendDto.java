@@ -1,6 +1,4 @@
 package com.modwin.ModwinChatApp.dto;
 
-public class FriendDto {
-    String username;
-    String email;
+public record FriendDto(Integer id, String username) {
 }
