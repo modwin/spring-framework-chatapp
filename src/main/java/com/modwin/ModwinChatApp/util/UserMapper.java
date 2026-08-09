@@ -4,6 +4,8 @@ import com.modwin.ModwinChatApp.dto.UserDto;
 import com.modwin.ModwinChatApp.persistence.model.User;
 import org.springframework.stereotype.Component;
 
+import java.util.stream.Collectors;
+
 @Component
 public class UserMapper {
 
@@ -12,12 +14,10 @@ public class UserMapper {
             return new UserDto();
         }
         return UserDto.builder()
-                .name(user.getName())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .roles(user.getRoles())
                 .password(null)
-                .friends(user.getFriends())
                 .build();
     }
 
@@ -26,11 +26,9 @@ public class UserMapper {
             return new User();
         }
         return User.builder()
-                .name(userDTO.getName())
                 .username(userDTO.getUsername())
                 .email(userDTO.getEmail())
                 .roles(userDTO.getRoles())
-                .friends(userDTO.getFriends())
                 .password(null)
                 .build();
     }
