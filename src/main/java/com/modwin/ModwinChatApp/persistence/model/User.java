@@ -43,7 +43,7 @@ public class User {
 
 
     // TODO: Add Friendship class to be able to add pending friends requests, blocked status etc.
-    @Builder.Default
+/*    @Builder.Default
     @ToString.Exclude
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(
@@ -51,10 +51,9 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "friend_id")
     )
-    private Set<User> friends = new HashSet<>();
+    private Set<User> friends = new HashSet<>();*/
 
-    public User(@NonNull String email, @NonNull String username, @NonNull String name, String password, Set<User> friends) {
-        this.friends = friends;
+    public User(@NonNull String email, @NonNull String username, @NonNull String name, String password) {
         this.email = email;
         this.username = username;
         this.password = password;

@@ -41,9 +41,6 @@ public class UserDto {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    @Builder.Default
-    @ToString.Exclude
-    private Set<UserDto> friends = new HashSet<>();
 
     public UserDto(@NonNull String email, @NonNull String username, @NonNull String name, String password) {
         this.email = email;
