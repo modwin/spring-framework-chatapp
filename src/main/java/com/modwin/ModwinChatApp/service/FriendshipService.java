@@ -1,6 +1,9 @@
 package com.modwin.ModwinChatApp.service;
 
+import com.modwin.ModwinChatApp.dto.FriendDto;
+import com.modwin.ModwinChatApp.dto.FriendshipResponse;
 import com.modwin.ModwinChatApp.exception.AccessDeniedException;
+import com.modwin.ModwinChatApp.exception.FriendshipAlreadyExistsException;
 import com.modwin.ModwinChatApp.exception.FriendshipNotFoundException;
 import com.modwin.ModwinChatApp.exception.UserNotFoundException;
 import com.modwin.ModwinChatApp.persistence.model.Friendship;
@@ -10,8 +13,6 @@ import com.modwin.ModwinChatApp.persistence.repository.UserRepository;
 import com.modwin.ModwinChatApp.util.FriendshipStatus;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class FriendshipService {
@@ -25,30 +26,51 @@ public class FriendshipService {
     }
 
     @Transactional
-    public void sendRequest(Integer requesterId, String recipientEmail){
-        Optional<User> requester = userRepository.findById(requesterId);
-        Optional<User> recipient = userRepository.findByEmail(recipientEmail);
+    public FriendshipResponse sendRequest(String requesterUsername, String recipientEmail) {
+        User requester = userRepository.findByUsername(requesterUsername)
+                .orElseThrow(() -> new UserNotFoundException("Authenticated user was not found."));
+        User recipient = userRepository.findByEmail(recipientEmail)
+                .orElseThrow(() -> new UserNotFoundException(
+                        "No user is registered with that email address."
+                ));
 
-        if(requester.isPresent() && recipient.isPresent()) {
-            Friendship friendship = new Friendship(requester.get(), recipient.get(), FriendshipStatus.PENDING);
-            friendshipRepository.save(friendship);
+        if (requester.equals(recipient)) {
+            throw new IllegalArgumentException("You cannot send a friend request to yourself.");
         }
-        else throw new UserNotFoundException("No user registered associated with that email address.");
+        if (friendshipRepository.existsBetween(requester, recipient)) {
+            throw new FriendshipAlreadyExistsException();
+        }
+
+        Friendship friendship = friendshipRepository.save(
+                new Friendship(requester, recipient, FriendshipStatus.PENDING)
+        );
+        return toResponse(friendship);
     }
 
-    public void removeFriendship(Integer friendshipId, Integer userId) {
-        Friendship f = friendshipRepository.findById(friendshipId)
+    @Transactional
+    public void removeFriendship(Integer friendshipId, String currentUsername) {
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new UserNotFoundException("Authenticated user was not found."));
+        Friendship friendship = friendshipRepository.findById(friendshipId)
                 .orElseThrow(() -> new FriendshipNotFoundException(friendshipId));
 
-        boolean isParticipant = f.getRequester().getId().equals(userId)
-                || f.getRecipient().getId().equals(userId);
+        boolean isParticipant = friendship.getRequester().equals(currentUser)
+                || friendship.getRecipient().equals(currentUser);
         if (!isParticipant) {
             throw new AccessDeniedException("You are not part of this friendship");
         }
 
-        friendshipRepository.delete(f);
+        friendshipRepository.delete(friendship);
     }
 
-
-
+    private FriendshipResponse toResponse(Friendship friendship) {
+        User requester = friendship.getRequester();
+        User recipient = friendship.getRecipient();
+        return new FriendshipResponse(
+                friendship.getId(),
+                new FriendDto(requester.getId(), requester.getUsername()),
+                new FriendDto(recipient.getId(), recipient.getUsername()),
+                friendship.getStatus()
+        );
+    }
 }
