@@ -73,27 +73,6 @@ public class UserService extends DefaultOAuth2UserService {
         return oAuth2User;
     }
 
-
-
-    @Transactional
-    public void removeFriend(UserDto userDto, String friendEmail){
-        Optional<User> optionalUser = userRepository.findByEmail(userDto.getEmail());
-        Optional<User> friend = userRepository.findByEmail(friendEmail);
-        System.out.println("UserService#removeFriend");
-        System.out.println("friend = " + friend);
-        System.out.println("friendEmail = " + friendEmail);
-        System.out.println("optionalUser = " + optionalUser);
-        if(friend.isPresent() && optionalUser.isPresent()){
-            User u = optionalUser.get();
-            User f = friend.get();
-            System.out.println("Removing friend " + f);
-            System.out.println(" from user " + u);
-            u.getFriends().remove(f);
-            f.getFriends().remove(u);
-        }
-        else throw new UserNotFoundException("No user registered associated with that email address.");
-    }
-
     public List<User> getUsers() {
         List<User> users = userRepository.findAll();
         if(users.isEmpty()){
