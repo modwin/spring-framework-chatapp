@@ -45,6 +45,7 @@ public class SecurityConfig {
                                 "/css/**", "/favicon.ico", "/oauth2/**", "/terms-and-conditions",
                                 "/h2-console", "/error", "/api/users/register"
                         ).permitAll()
+                        .requestMatchers("/api/friendships/**").authenticated()
                         .requestMatchers("/profile", "/api/users/addFriend","/api/users/removeFriend").authenticated()
                         .anyRequest().permitAll()
                 )
