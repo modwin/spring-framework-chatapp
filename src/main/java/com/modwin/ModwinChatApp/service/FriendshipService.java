@@ -9,9 +9,11 @@ import com.modwin.ModwinChatApp.persistence.repository.FriendshipRepository;
 import com.modwin.ModwinChatApp.persistence.repository.UserRepository;
 import com.modwin.ModwinChatApp.util.FriendshipStatus;
 import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
 public class FriendshipService {
 
     private final FriendshipRepository friendshipRepository;
