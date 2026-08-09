@@ -30,7 +30,7 @@ public class FriendshipService {
         Optional<User> recipient = userRepository.findByEmail(recipientEmail);
 
         if(requester.isPresent() && recipient.isPresent()) {
-            Friendship friendship = Friendship.builder().recipient(recipient.get()).requester(requester.get()).status(FriendshipStatus.PENDING).build();
+            Friendship friendship = new Friendship(requester.get(), recipient.get(), FriendshipStatus.PENDING);
             friendshipRepository.save(friendship);
         }
         else throw new UserNotFoundException("No user registered associated with that email address.");

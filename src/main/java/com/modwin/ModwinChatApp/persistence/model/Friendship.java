@@ -2,23 +2,34 @@ package com.modwin.ModwinChatApp.persistence.model;
 
 import com.modwin.ModwinChatApp.dto.UserDto;
 import com.modwin.ModwinChatApp.util.FriendshipStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import lombok.Builder;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 
-@Builder
-@Data
+@Getter @Setter
+@NoArgsConstructor
+@Entity
 public class Friendship {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "requester_id", nullable = false)
     private User requester;
+
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "recipient_id", nullable = false)
     private User recipient;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private FriendshipStatus status;
 
-
-
+    public Friendship(User requester, User recipient, FriendshipStatus status) {
+        this.requester = requester;
+        this.recipient = recipient;
+        this.status = status;
+    }
 }
