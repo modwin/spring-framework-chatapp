@@ -1,6 +1,7 @@
 package com.modwin.ModwinChatApp.service;
 
-import com.modwin.ModwinChatApp.dto.UserDto;
+import com.modwin.ModwinChatApp.exception.AccessDeniedException;
+import com.modwin.ModwinChatApp.exception.FriendshipNotFoundException;
 import com.modwin.ModwinChatApp.exception.UserNotFoundException;
 import com.modwin.ModwinChatApp.persistence.model.Friendship;
 import com.modwin.ModwinChatApp.persistence.model.User;
@@ -22,9 +23,9 @@ public class FriendshipService {
     }
 
     @Transactional
-    public void sendFriendRequest(UserDto user, String friendEmail){
-        Optional<User> requester = userRepository.findByEmail(user.getEmail());
-        Optional<User> recipient = userRepository.findByEmail(friendEmail);
+    public void sendRequest(Integer requesterId, String recipientEmail){
+        Optional<User> requester = userRepository.findById(requesterId);
+        Optional<User> recipient = userRepository.findByEmail(recipientEmail);
 
         if(requester.isPresent() && recipient.isPresent()) {
             Friendship friendship = Friendship.builder().recipient(recipient.get()).requester(requester.get()).status(FriendshipStatus.PENDING).build();
@@ -33,6 +34,18 @@ public class FriendshipService {
         else throw new UserNotFoundException("No user registered associated with that email address.");
     }
 
+    public void removeFriendship(Integer friendshipId, Integer userId) {
+        Friendship f = friendshipRepository.findById(friendshipId)
+                .orElseThrow(() -> new FriendshipNotFoundException(friendshipId));
+
+        boolean isParticipant = f.getRequester().getId().equals(userId)
+                || f.getRecipient().getId().equals(userId);
+        if (!isParticipant) {
+            throw new AccessDeniedException("You are not part of this friendship");
+        }
+
+        friendshipRepository.delete(f);
+    }
 
 
 
