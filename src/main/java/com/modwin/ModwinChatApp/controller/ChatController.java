@@ -1,18 +1,15 @@
 package com.modwin.ModwinChatApp.controller;
 
 import com.modwin.ModwinChatApp.dto.ChatDto;
-import com.modwin.ModwinChatApp.dto.MessageDto;
-import com.modwin.ModwinChatApp.promise.MessageResponse;
-import com.modwin.ModwinChatApp.promise.SendMessageRequest;
+import com.modwin.ModwinChatApp.dto.MessageResponse;
+import com.modwin.ModwinChatApp.dto.SendMessageRequest;
 import com.modwin.ModwinChatApp.service.ChatService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.List;
 
 @RestController("/api/chats")
 public class ChatController {

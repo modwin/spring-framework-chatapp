@@ -10,10 +10,8 @@ import com.modwin.ModwinChatApp.persistence.model.User;
 import com.modwin.ModwinChatApp.persistence.repository.ChatRepository;
 import com.modwin.ModwinChatApp.persistence.repository.MessageRepository;
 import com.modwin.ModwinChatApp.persistence.repository.UserRepository;
-import com.modwin.ModwinChatApp.promise.MessageResponse;
-import com.modwin.ModwinChatApp.promise.SendMessageRequest;
-import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
+import com.modwin.ModwinChatApp.dto.MessageResponse;
+import com.modwin.ModwinChatApp.dto.SendMessageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
