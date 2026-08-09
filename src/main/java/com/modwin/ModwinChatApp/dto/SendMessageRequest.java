@@ -1,4 +1,4 @@
-package com.modwin.ModwinChatApp.promise;
+package com.modwin.ModwinChatApp.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

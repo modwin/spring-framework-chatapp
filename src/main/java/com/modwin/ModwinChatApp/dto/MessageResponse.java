@@ -1,4 +1,4 @@
-package com.modwin.ModwinChatApp.promise;
+package com.modwin.ModwinChatApp.dto;
 
 import java.time.LocalDateTime;
 
