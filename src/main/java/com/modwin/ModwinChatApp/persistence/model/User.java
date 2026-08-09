@@ -17,11 +17,14 @@ import java.util.*;
 public class User {
 
     @NonNull
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
     @NonNull
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String username;
+    @NonNull
+    @Column(nullable = false)
+    private String name;
 
     @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
@@ -56,6 +59,7 @@ public class User {
     public User(@NonNull String email, @NonNull String username, @NonNull String name, String password) {
         this.email = email;
         this.username = username;
+        this.name = name;
         this.password = password;
         this.roles = new HashSet<>();
     }
