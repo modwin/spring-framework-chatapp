@@ -2,7 +2,6 @@ package com.modwin.ModwinChatApp.controller;
 
 import com.modwin.ModwinChatApp.dto.UserDto;
 import com.modwin.ModwinChatApp.exception.UserAlreadyExistsException;
-import com.modwin.ModwinChatApp.exception.UserNotFoundException;
 import com.modwin.ModwinChatApp.service.UserService;
 import com.modwin.ModwinChatApp.persistence.model.User;
 import com.modwin.ModwinChatApp.util.UserMapper;
@@ -10,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,7 +28,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.security.Principal;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -131,41 +128,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(dto);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
-    @PostMapping("/addFriend")
-    public ResponseEntity<String> addFriend(@NotNull @RequestBody String email, Principal principal) {
-        if(principal instanceof OAuth2AuthenticationToken oauthUser) {
-            UserDto u = userService.getUserDTOByEmail(oauthUser.getPrincipal().getAttribute("email"));
-            System.out.println("FOUND USER, ADDING EMAIL = " + email);
-            userService.addFriend(u, email);
-            return ResponseEntity.ok().body(email);
-        }
-        else if (principal instanceof UsernamePasswordAuthenticationToken localUser) {
-            System.out.println("localUser = " + localUser);
-            UserDto u = userService.getUserDTOByUsername(principal.getName());
-            userService.addFriend(u, email);
-            return ResponseEntity.ok().body(email);
-        }
-        return ResponseEntity.badRequest().body(email);
-    }
-
-    @PostMapping("/removeFriend")
-    public ResponseEntity<?> removeFriend(@NotNull @RequestBody String email, Principal principal) {
-        if(principal instanceof OAuth2AuthenticationToken oauthUser) {
-            UserDto u = userService.getUserDTOByEmail(oauthUser.getPrincipal().getAttribute("email"));
-            System.out.println("FOUND USER, ADDING EMAIL = " + email);
-            userService.removeFriend(u, email);
-            return ResponseEntity.ok().body(email);
-        }
-        else if (principal instanceof UsernamePasswordAuthenticationToken localUser) {
-            System.out.println("localUser = " + localUser);
-            System.out.println("ATTEMPTING TO REMOVE FRIEND = " + email);
-            UserDto u = userService.getUserDTOByUsername(principal.getName());
-            userService.removeFriend(u, email);
-            return ResponseEntity.ok().body(email);
-        }
-        return ResponseEntity.badRequest().build();
     }
 
     @GetMapping("/getUser/username/{username}")
