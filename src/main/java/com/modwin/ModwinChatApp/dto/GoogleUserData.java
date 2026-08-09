@@ -1,4 +1,4 @@
-package com.modwin.ModwinChatApp.util;
+package com.modwin.ModwinChatApp.dto;
 
 import java.util.Map;
 
