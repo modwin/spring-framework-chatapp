@@ -9,8 +9,6 @@ import com.modwin.ModwinChatApp.persistence.repository.RoleRepository;
 import com.modwin.ModwinChatApp.persistence.repository.UserRepository;
 import com.modwin.ModwinChatApp.persistence.model.Role;
 import com.modwin.ModwinChatApp.persistence.model.User;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
@@ -31,8 +29,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 @Service
 public class UserService extends DefaultOAuth2UserService {
@@ -57,7 +53,7 @@ public class UserService extends DefaultOAuth2UserService {
         if(optionalUser.isEmpty()){
             validateUserDTO(userDto);
             checkUsernameAvailability(userDto);
-            User u = new User(userDto.getEmail(), userDto.getUsername(), userDto.getName(), passwordEncoder.encode(userDto.getPassword()), new HashSet<>());
+            User u = new User(userDto.getEmail(), userDto.getUsername(), userDto.getName(), passwordEncoder.encode(userDto.getPassword()));
             return userRepository.save(addDefaultRoleToUser(u));
         }
         throw new UserAlreadyExistsException("User already exists");
@@ -70,25 +66,14 @@ public class UserService extends DefaultOAuth2UserService {
         String email = oAuth2User.getAttribute("email");
 
         if (email != null && userRepository.findByEmail(email).isEmpty()) {
-            User newUser = new User(email, oAuth2User.getName(), oAuth2User.getName(), passwordEncoder.encode(UUID.randomUUID().toString()), new HashSet<>());
+            User newUser = new User(email, oAuth2User.getName(), oAuth2User.getName(), passwordEncoder.encode(UUID.randomUUID().toString()));
             newUser.getRoles().add(getOrCreateDefaultRole());
             userRepository.save(newUser);
         }
         return oAuth2User;
     }
 
-    @Transactional
-    public void addFriend(UserDto user, String friendEmail){
-        Optional<User> optionalUser = userRepository.findByEmail(user.getEmail());
-        Optional<User> friend = userRepository.findByEmail(friendEmail);
-        if(friend.isPresent() && optionalUser.isPresent()){
-            User u = optionalUser.get();
-            User f = friend.get();
-            u.getFriends().add(f);
-            f.getFriends().add(u);
-        }
-        else throw new UserNotFoundException("No user registered associated with that email address.");
-    }
+
 
     @Transactional
     public void removeFriend(UserDto userDto, String friendEmail){
