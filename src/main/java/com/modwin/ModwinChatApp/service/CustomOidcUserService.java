@@ -4,7 +4,7 @@ import com.modwin.ModwinChatApp.persistence.repository.RoleRepository;
 import com.modwin.ModwinChatApp.persistence.repository.UserRepository;
 import com.modwin.ModwinChatApp.persistence.model.Role;
 import com.modwin.ModwinChatApp.persistence.model.User;
-import com.modwin.ModwinChatApp.util.GoogleUserData;
+import com.modwin.ModwinChatApp.dto.GoogleUserDto;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -14,7 +14,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 
@@ -41,11 +40,16 @@ public class CustomOidcUserService extends OidcUserService {
     }
 
     private OidcUser processOidcUser(OidcUserRequest userRequest, OidcUser oidcUser) {
-        GoogleUserData googleUserData = new GoogleUserData(oidcUser.getAttributes());
-        Optional<User> userOptional = userRepository.findByEmail(googleUserData.getEmail());
+        GoogleUserDto googleUserDto = new GoogleUserDto(oidcUser.getAttributes());
+        Optional<User> userOptional = userRepository.findByEmail(googleUserDto.getEmail());
 
         if (userOptional.isEmpty()) {
-            User user = new User(googleUserData.getEmail(), googleUserData.getEmail(), googleUserData.getName(), "oauth2login", new ArrayList<>());;
+            User user = new User(
+                    googleUserDto.getEmail(),
+                    googleUserDto.getEmail(),
+                    googleUserDto.getName(),
+                    "oauth2login"
+            );
             userRepository.save(addDefaultRoleToUser(user));
         }
 
