@@ -22,9 +22,6 @@ public class User {
     @NonNull
     @Column(unique = true)
     private String username;
-    @NonNull
-    @Column
-    private String name;
 
     @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
@@ -60,7 +57,6 @@ public class User {
         this.friends = friends;
         this.email = email;
         this.username = username;
-        this.name = name;
         this.password = password;
         this.roles = new HashSet<>();
     }
