@@ -1,21 +1,23 @@
 package com.modwin.ModwinChatApp.persistence.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.ManyToAny;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Data
+@Table(name = "message")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="user_id",unique = true, nullable = false)
-    private Integer ID;
+    @Column(name = "message_id")
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "chat_id", nullable = false)
@@ -24,14 +26,19 @@ public class Message {
     @Column(nullable = false, length = 4000)
     private String content;
 
-    @Column
+    @Column(nullable = false)
     private LocalDateTime sentAt;
-    @Column
+
     private LocalDateTime lastEdit;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "sender_user_id", nullable = false)
     private User sender;
 
-
+    @PrePersist
+    void setInitialTimestamp() {
+        if (sentAt == null) {
+            sentAt = LocalDateTime.now();
+        }
+    }
 }

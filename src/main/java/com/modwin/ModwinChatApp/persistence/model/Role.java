@@ -2,39 +2,39 @@ package com.modwin.ModwinChatApp.persistence.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.Hibernate;
 
 import java.util.Objects;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@RequiredArgsConstructor
-@Entity(name="ROLES")
+@Entity
+@Table(name = "roles")
+@NoArgsConstructor
 public class Role {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="role_id",unique = true, nullable = false)
-    private Integer ID;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "role_id")
+    private Integer id;
 
-    @NonNull
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 50)
     private String name;
 
-    public Role() {
-
+    public Role(String name) {
+        this.name = Objects.requireNonNull(name);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Role role = (Role) o;
-        return Objects.equals(ID, role.ID);
+        return id != null && role.id != null && Objects.equals(id, role.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ID);
+        return Hibernate.getClass(this).hashCode();
     }
 }
