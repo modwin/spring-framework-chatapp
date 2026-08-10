@@ -2,28 +2,6 @@
 
 Review date: 2026-08-10
 
-## Executive assessment
-
-The project had a reasonable learning-project skeleton, but its public surface was ahead of its actual business logic. The most serious problems were an unauthenticated login bypass, disabled CSRF protection, a Google credential in local configuration and Git history, an outdated frontend/backend contract, and container definitions that did not start a complete system.
-
-The implemented refactor brings the working scope to a coherent account-and-friendship application. Security boundaries, API contracts, schema ownership, tests, and local deployment now describe the same system. Messaging has been quarantined at the persistence layer instead of being exposed through incomplete controllers.
-
-## Findings and actions
-
-| Severity | Area | Finding | Resolution |
-| --- | --- | --- | --- |
-| Critical | Secrets | A Google OAuth client secret was present in an ignored source configuration file and remains in Git history. | Removed secret-bearing configuration from the working tree, added environment-driven OAuth configuration, and ignored `.env`/`application-local.yml`. The credential still must be revoked and rotated externally. |
-| Critical | Authentication | `/api/users/login/auth` accepted identity data without verifying credentials. | Removed the endpoint and DTO; local login now goes through Spring Security's `AuthenticationManager`. |
-| High | Web security | CSRF was disabled for a session-authenticated browser application, and route authorization was broadly permissive. | Restored CSRF, added a token endpoint, introduced an explicit allowlist, denied unspecified routes, rotated session IDs, and returned JSON problem responses for 401/403. |
-| High | API contract | The React app targeted stale endpoints and presented unfinished functionality as available. | Added typed API modules, aligned every request with the backend, and limited UI claims to authentication and friendships. |
-| High | Persistence | Hibernate implicitly owned schema creation, while PostgreSQL runtime support and migration control were incomplete. | Added PostgreSQL runtime support, Flyway, an initial migration, schema validation, and a PostgreSQL/Testcontainers compatibility test. |
-| High | Friendships | The original relationship model did not clearly represent pending/accepted direction or authorization. | Modeled requester, recipient, and status explicitly; only recipients can accept and only participants can remove. Added unordered-pair uniqueness at the database layer. |
-| Medium | API design | Persistence entities and over-broad DTOs leaked concepts across layers; exception semantics were inconsistent. | Added request/response records, a mapper boundary, validation, and centralized problem-detail handling. |
-| Medium | Frontend structure | A stale monolithic app mixed presentation, transport, and workflow state. | Split API contracts/client, authentication, dashboard, friendship, and alert components; retained workflow orchestration in `App`. |
-| Medium | Delivery | Backend/frontend Docker files used inconsistent runtimes and the frontend-only Compose file omitted PostgreSQL and the backend topology. | Standardized Java 21 and Node 24 builds, used `npm ci`, added non-root backend runtime, and consolidated the stack in root `compose.yaml`. |
-| Medium | Verification | Coverage did not protect the security boundary or the full friendship lifecycle. | Added controller, service, browser-component, API-client, and optional real-PostgreSQL migration tests. |
-| Low | Repository hygiene | Generated template documentation, dead controllers/services/DTOs, redundant repository methods, and an unused servlet initializer obscured responsibilities. | Removed or replaced these items and documented the supported scope. |
-
 ## Current responsibility distribution
 
 The backend uses a conventional layered layout:
