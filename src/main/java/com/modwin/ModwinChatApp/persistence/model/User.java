@@ -1,29 +1,35 @@
 package com.modwin.ModwinChatApp.persistence.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.lang.Nullable;
+import org.hibernate.Hibernate;
 
 import java.util.*;
 
 @Getter
 @Setter
-@Entity(name = "users")
+@Entity
+@Table(name = "users")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 public class User {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
+    private Integer id;
+
     @NonNull
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 254)
     private String email;
+
     @NonNull
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 20)
     private String username;
+
     @NonNull
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String name;
 
     @Builder.Default
@@ -35,26 +41,8 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-    @Nullable
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(length = 100)
     private String password;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="user_id",unique = true, nullable = false)
-    private Integer id;
-
-
-    // TODO: Add Friendship class to be able to add pending friends requests, blocked status etc.
-/*    @Builder.Default
-    @ToString.Exclude
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-    @JoinTable(
-            name = "users_friends",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "friend_id")
-    )
-    private Set<User> friends = new HashSet<>();*/
 
     public User(@NonNull String email, @NonNull String username, @NonNull String name, String password) {
         this.email = email;
@@ -67,13 +55,13 @@ public class User {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         User user = (User) o;
         return id != null && user.id != null && Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Hibernate.getClass(this).hashCode();
     }
 }
