@@ -1,37 +1,27 @@
 package com.modwin.ModwinChatApp.util;
 
-import com.modwin.ModwinChatApp.dto.UserDto;
+import com.modwin.ModwinChatApp.dto.UserResponse;
+import com.modwin.ModwinChatApp.persistence.model.Role;
 import com.modwin.ModwinChatApp.persistence.model.User;
-import org.springframework.stereotype.Component;
 
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
-@Component
-public class UserMapper {
+public final class UserMapper {
 
-    public static UserDto toDTO(User user){
-        if(user == null){
-            return new UserDto();
-        }
-        return UserDto.builder()
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .name(user.getName())
-                .roles(user.getRoles())
-                .password(null)
-                .build();
+    private UserMapper() {
     }
 
-    public static User toEntity(UserDto userDTO){
-        if(userDTO == null){
-            return new User();
-        }
-        return User.builder()
-                .username(userDTO.getUsername())
-                .email(userDTO.getEmail())
-                .name(userDTO.getName())
-                .roles(userDTO.getRoles())
-                .password(null)
-                .build();
+    public static UserResponse toResponse(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getName(),
+                user.getRoles().stream()
+                        .map(Role::getName)
+                        .sorted()
+                        .collect(Collectors.toCollection(LinkedHashSet::new))
+        );
     }
 }
