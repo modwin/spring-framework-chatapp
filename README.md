@@ -1,68 +1,99 @@
-# Spring Boot framework - modwin chatapp
+# Modwin Chat
 
-A full-stack, containerized web application built with **Spring Boot**, **React**, and **PostgreSQL** — demonstrating dual-mode authentication (local + Google OAuth2/OIDC), a JPA-modeled friends network, and a production-style Docker/Nginx deployment topology.
+Modwin Chat is a full-stack account and friendship application built with Spring Boot, React, and PostgreSQL. The repository contains a working authentication and social-graph foundation; chat delivery is intentionally not exposed until its business rules are implemented.
 
-**Note on the name:** the original goal was a full chat application. What's built and verified so far is the authentication and social-graph layer beneath it — the messaging layer itself is the current work in progress (see [Current Status](#current-status)).
+## Current capabilities
 
-## Tech Stack
+- Local registration and login using BCrypt and server-side sessions
+- Optional Google OpenID Connect login
+- Authenticated profile retrieval
+- Send, accept, decline/cancel, and remove friendship relationships
+- CSRF protection and RFC 9457-style API problem responses
+- Flyway-managed PostgreSQL schema
+- Responsive React UI backed by typed API contracts
 
-| Layer      | Technology                                                        |
-|------------|---------------------------------------------------------------------|
-| Backend    | Java 17, Spring Boot 3.3, Spring Security 6, Spring Data JPA        |
-| Frontend   | React 19, TypeScript, Vite                                          |
-| Database   | PostgreSQL (runtime), H2 (test)                                     |
-| Auth       | Local username/password (BCrypt) + Google OAuth2 / OIDC             |
-| Infra      | Docker (multi-stage builds), Docker Compose, Nginx reverse proxy    |
+`Chat` and `Message` persistence models remain as future-facing domain groundwork. There are no chat endpoints or real-time delivery claims yet.
 
-## Current Status
+## Technology
 
-### Implemented and working
-- User registration and local login, passwords hashed with BCrypt
-- Google OAuth2/OIDC login ("Sign in with Google")
-- Session-based authentication via Spring Security, supporting both auth methods concurrently
-- Friend system — add/remove friends by email, modeled as a bidirectional JPA `@ManyToMany` relationship
-- User profile retrieval
-- Fully containerized stack: backend, frontend (served via Nginx), and PostgreSQL each run in their own container
-- Integration test covering the register → login → invalid-login flow
+| Area | Stack |
+| --- | --- |
+| Backend | Java 21, Spring Boot 3.5, Spring Security, Spring Data JPA |
+| Frontend | React 19, TypeScript 6, Vite 8 |
+| Data | PostgreSQL 17, Flyway; H2 for fast tests |
+| Delivery | Docker Compose, multi-stage images, Nginx reverse proxy |
 
-### Not yet implemented
-- **Chat / messaging.** `Chat` and `Message` entities and repositories exist, but the service and controller layer for sending, storing, and retrieving messages is not yet built.
-- **Real-time delivery** (WebSocket/STOMP) for messages, once the above is in place.
-- **Profile editing** — profiles are currently read-only after registration.
+## Run the complete stack
 
-## Architecture
-
-- The React frontend is built and served as static assets via Nginx, which reverse-proxies `/api`, `/oauth2`, and `/login` through to the Spring Boot backend (see `nginx.conf`).
-- The backend exposes REST endpoints under `/api/users/**` and handles both local and OAuth2/OIDC authentication through a single Spring Security filter chain.
-- PostgreSQL persists `User`, `Role`, `Chat`, and `Message` entities. The `Chat`/`Message` tables exist but aren't yet wired to any endpoint.
-
-## Running Locally
-
-**Prerequisites:** Docker and Docker Compose.
+Prerequisites: Docker Desktop (or Docker Engine with Compose).
 
 ```bash
 docker compose up --build
 ```
 
-This builds and starts the backend, frontend, and PostgreSQL containers together. By default the backend listens on `8081` inside its container and the frontend's Nginx serves on `80` inside its container — check your local `docker-compose.yml` for the exact host port mappings, since these can be environment-specific.
+Open <http://localhost:3000>. PostgreSQL data is retained in the `postgres-data` volume. The backend is reachable through Nginx rather than published directly.
 
-**Google OAuth2 login** requires a `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to be set (see `spring.security.oauth2.client.registration.google.*` in `application.properties`, which is git-ignored — you'll need to supply your own via a `.env` file or environment variables).
+The checked-in defaults are intended only for local development. Copy `.env.example` to `.env` to override them. Do not use the default database password outside a local machine.
 
-## Roadmap
+### Optional Google login
 
-- [ ] Chat message sending/receiving (`ChatService`, `ChatController`)
-- [ ] Real-time delivery via WebSocket/STOMP
-- [ ] Frontend chat UI
-- [ ] Profile editing
-- [ ] Expanded test coverage for friend endpoints, and for chat once implemented
+Set these values in `.env`:
 
-## Notable Engineering Details
+```dotenv
+SPRING_PROFILES_ACTIVE=oauth
+GOOGLE_CLIENT_ID=your-client-id
+GOOGLE_CLIENT_SECRET=your-client-secret
+FRONTEND_URL=http://localhost:3000
+```
 
-- **Dual authentication paths** (local credentials + OAuth2/OIDC) coexisting cleanly in a single Spring Security configuration, rather than two separately bolted-on systems.
-- **Bidirectional relationship modeling** in JPA for the friends graph.
-- **Production-style deployment topology** — multi-stage Docker builds for both services, with Nginx handling static asset serving and reverse proxying rather than exposing the backend directly.
-- **AI-agent-assisted development, human-reviewed:** the initial React/Vite frontend (auth forms, friend management UI) was built autonomously by [Junie](https://www.jetbrains.com/junie/) (JetBrains' agentic coding assistant in IntelliJ IDEA) while backend architecture, security configuration, and integration were designed and verified by hand — including catching and fixing JPA mapping issues in the AI-generated scaffolding.
+Configure the provider callback as `http://localhost:3000/login/oauth2/code/google`. Nginx forwards that route to Spring Security.
+
+## Run during development
+
+Start PostgreSQL first (the Compose database service is sufficient), then run the backend with Java 21:
+
+```bash
+./mvnw spring-boot:run
+```
+
+In a second terminal:
+
+```bash
+cd frontend
+npm ci
+npm run dev
+```
+
+The Vite development server proxies backend routes to port `8081`.
+
+## Verification
+
+```bash
+./mvnw test
+cd frontend
+npm run lint
+npm test
+npm run build
+```
+
+The PostgreSQL migration test runs when Docker is available and is skipped otherwise. The remaining backend tests use an isolated H2 database.
+
+## API summary
+
+| Method | Path | Access | Purpose |
+| --- | --- | --- | --- |
+| GET | `/api/csrf` | Public | Obtain the session CSRF token |
+| GET | `/api/auth/providers` | Public | Discover enabled login providers |
+| POST | `/api/auth/register` | Public + CSRF | Create and sign in a local account |
+| POST | `/api/auth/login` | Public + CSRF | Sign in a local account |
+| POST | `/api/auth/logout` | Authenticated + CSRF | End the current session |
+| GET | `/api/users/me` | Authenticated | Get the current profile |
+| GET/POST | `/api/friendships` | Authenticated | List or create requests |
+| PATCH | `/api/friendships/{id}/accept` | Recipient | Accept a pending request |
+| DELETE | `/api/friendships/{id}` | Participant | Decline, cancel, or remove |
+
+See [the architecture review](docs/architecture-review.md) for the design assessment, implemented corrections, and deferred recommendations.
 
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+MIT — see [LICENSE](LICENSE).
