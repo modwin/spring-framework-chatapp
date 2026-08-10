@@ -18,7 +18,10 @@ target/
 *.iws
 *.iml
 *.ipr
-src/main/resources/application.**
+src/main/resources/*.yml
+.env
+.env.*
+!.env.example
 
 ### NetBeans ###
 /nbproject/private/
@@ -34,6 +37,4 @@ build/
 .vscode/
 AGENTS.md
 /CONTEXT_GUIDE.md
-/docs
-/docs/
-/docker-compose.yml
+/docker-compose.override.yml
