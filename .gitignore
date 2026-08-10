@@ -18,7 +18,6 @@ target/
 *.iws
 *.iml
 *.ipr
-src/main/resources/*.yml
 .env
 .env.*
 !.env.example
@@ -38,3 +37,4 @@ build/
 AGENTS.md
 /CONTEXT_GUIDE.md
 /docker-compose.override.yml
+/.env.example
