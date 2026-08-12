@@ -11,8 +11,11 @@ import com.modwin.ModwinChatApp.persistence.model.User;
 import com.modwin.ModwinChatApp.persistence.repository.FriendshipRepository;
 import com.modwin.ModwinChatApp.persistence.repository.UserRepository;
 import com.modwin.ModwinChatApp.util.FriendshipStatus;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Locale;
 
 @Service
 public class FriendshipService {
@@ -25,11 +28,16 @@ public class FriendshipService {
         this.userRepository = userRepository;
     }
 
+    @Transactional(readOnly = true)
+    public List<FriendshipResponse> listFor(User currentUser) {
+        return friendshipRepository.findAllForUser(currentUser.getId()).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     @Transactional
-    public FriendshipResponse sendRequest(String requesterUsername, String recipientEmail) {
-        User requester = userRepository.findByUsername(requesterUsername)
-                .orElseThrow(() -> new UserNotFoundException("Authenticated user was not found."));
-        User recipient = userRepository.findByEmail(recipientEmail)
+    public FriendshipResponse sendRequest(User requester, String recipientEmail) {
+        User recipient = userRepository.findByEmail(recipientEmail.trim().toLowerCase(Locale.ROOT))
                 .orElseThrow(() -> new UserNotFoundException(
                         "No user is registered with that email address."
                 ));
@@ -48,19 +56,33 @@ public class FriendshipService {
     }
 
     @Transactional
-    public void removeFriendship(Integer friendshipId, String currentUsername) {
-        User currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> new UserNotFoundException("Authenticated user was not found."));
-        Friendship friendship = friendshipRepository.findById(friendshipId)
-                .orElseThrow(() -> new FriendshipNotFoundException(friendshipId));
+    public FriendshipResponse accept(Integer friendshipId, User currentUser) {
+        Friendship friendship = requireFriendship(friendshipId);
+        if (!friendship.getRecipient().equals(currentUser)) {
+            throw new AccessDeniedException("Only the recipient can accept this friend request.");
+        }
+        if (friendship.getStatus() != FriendshipStatus.PENDING) {
+            throw new IllegalStateException("Only pending friend requests can be accepted.");
+        }
 
+        friendship.setStatus(FriendshipStatus.ACCEPTED);
+        return toResponse(friendship);
+    }
+
+    @Transactional
+    public void remove(Integer friendshipId, User currentUser) {
+        Friendship friendship = requireFriendship(friendshipId);
         boolean isParticipant = friendship.getRequester().equals(currentUser)
                 || friendship.getRecipient().equals(currentUser);
         if (!isParticipant) {
-            throw new AccessDeniedException("You are not part of this friendship");
+            throw new AccessDeniedException("You are not part of this friendship.");
         }
-
         friendshipRepository.delete(friendship);
+    }
+
+    private Friendship requireFriendship(Integer friendshipId) {
+        return friendshipRepository.findById(friendshipId)
+                .orElseThrow(() -> new FriendshipNotFoundException(friendshipId));
     }
 
     private FriendshipResponse toResponse(Friendship friendship) {
@@ -68,8 +90,8 @@ public class FriendshipService {
         User recipient = friendship.getRecipient();
         return new FriendshipResponse(
                 friendship.getId(),
-                new FriendDto(requester.getId(), requester.getUsername()),
-                new FriendDto(recipient.getId(), recipient.getUsername()),
+                new FriendDto(requester.getId(), requester.getUsername(), requester.getName()),
+                new FriendDto(recipient.getId(), recipient.getUsername(), recipient.getName()),
                 friendship.getStatus()
         );
     }
