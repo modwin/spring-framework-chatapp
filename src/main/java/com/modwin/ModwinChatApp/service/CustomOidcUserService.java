@@ -1,73 +1,43 @@
 package com.modwin.ModwinChatApp.service;
 
-import com.modwin.ModwinChatApp.persistence.repository.RoleRepository;
-import com.modwin.ModwinChatApp.persistence.repository.UserRepository;
-import com.modwin.ModwinChatApp.persistence.model.Role;
-import com.modwin.ModwinChatApp.persistence.model.User;
-import com.modwin.ModwinChatApp.dto.GoogleUserDto;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
-
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CustomOidcUserService extends OidcUserService {
 
-    private final RoleRepository roleRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    @Autowired
-    public CustomOidcUserService(RoleRepository roleRepository, UserRepository userRepository) {
-        this.roleRepository = roleRepository;
-        this.userRepository = userRepository;
+    public CustomOidcUserService(UserService userService) {
+        this.userService = userService;
     }
 
     @Override
+    @Transactional
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
         OidcUser oidcUser = super.loadUser(userRequest);
         try {
-            return processOidcUser(userRequest, oidcUser);
-        } catch (Exception ex) {
-            throw new InternalAuthenticationServiceException(ex.getMessage(), ex.getCause());
-        }
-    }
-
-    private OidcUser processOidcUser(OidcUserRequest userRequest, OidcUser oidcUser) {
-        GoogleUserDto googleUserDto = new GoogleUserDto(oidcUser.getAttributes());
-        Optional<User> userOptional = userRepository.findByEmail(googleUserDto.getEmail());
-
-        if (userOptional.isEmpty()) {
-            User user = new User(
-                    googleUserDto.getEmail(),
-                    googleUserDto.getEmail(),
-                    googleUserDto.getName(),
-                    "oauth2login"
+            String email = oidcUser.getEmail();
+            if (email == null || !Boolean.TRUE.equals(oidcUser.getEmailVerified())) {
+                throw new InternalAuthenticationServiceException("Google did not provide a verified email address.");
+            }
+            userService.provisionOidcUser(email, oidcUser.getFullName());
+            return new DefaultOidcUser(
+                    oidcUser.getAuthorities(),
+                    oidcUser.getIdToken(),
+                    oidcUser.getUserInfo(),
+                    "email"
             );
-            userRepository.save(addDefaultRoleToUser(user));
+        } catch (InternalAuthenticationServiceException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            throw new InternalAuthenticationServiceException("Could not provision the Google user.", exception);
         }
-
-        return oidcUser;
     }
-    @Transactional
-    protected User addDefaultRoleToUser(User u) {
-        u.getRoles().add(getOrCreateDefaultRole());
-        return u;
-    }
-
-    @Transactional
-    protected Role getOrCreateDefaultRole() {
-        return roleRepository.findByName("USER")
-                .orElseGet(() -> roleRepository.save(new Role("USER")));
-    }
-
-
-
-
 }
