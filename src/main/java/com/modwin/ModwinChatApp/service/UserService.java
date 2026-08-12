@@ -1,157 +1,110 @@
 package com.modwin.ModwinChatApp.service;
 
-import com.modwin.ModwinChatApp.dto.UserDto;
-import com.modwin.ModwinChatApp.exception.InvalidUserInputException;
+import com.modwin.ModwinChatApp.dto.RegisterUserRequest;
+import com.modwin.ModwinChatApp.dto.UserResponse;
 import com.modwin.ModwinChatApp.exception.UserAlreadyExistsException;
 import com.modwin.ModwinChatApp.exception.UserNotFoundException;
-import com.modwin.ModwinChatApp.util.UserMapper;
-import com.modwin.ModwinChatApp.persistence.repository.RoleRepository;
-import com.modwin.ModwinChatApp.persistence.repository.UserRepository;
 import com.modwin.ModwinChatApp.persistence.model.Role;
 import com.modwin.ModwinChatApp.persistence.model.User;
-import jakarta.transaction.Transactional;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Valid;
-import jakarta.validation.Validator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.modwin.ModwinChatApp.persistence.repository.RoleRepository;
+import com.modwin.ModwinChatApp.persistence.repository.UserRepository;
+import com.modwin.ModwinChatApp.util.UserMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Locale;
 
 @Service
-public class UserService extends DefaultOAuth2UserService {
+public class UserService {
+
+    private static final String DEFAULT_ROLE = "USER";
 
     private final RoleRepository roleRepository;
-    private final Validator validator;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    public UserService(RoleRepository roleRepository, Validator validator, UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager){
-        this.userRepository = userRepository;
+    public UserService(RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.roleRepository = roleRepository;
-        this.validator = validator;
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
     }
+
     @Transactional
-    public User registerNewUser(@Valid UserDto userDto) {
-        Optional<User> optionalUser = userRepository.findByEmail(userDto.getEmail());
-        if(optionalUser.isEmpty()){
-            validateUserDTO(userDto);
-            checkUsernameAvailability(userDto);
-            User u = new User(userDto.getEmail(), userDto.getUsername(), userDto.getName(), passwordEncoder.encode(userDto.getPassword()));
-            return userRepository.save(addDefaultRoleToUser(u));
+    public User register(RegisterUserRequest request) {
+        String email = normalizeEmail(request.email());
+        String username = request.username().trim();
+
+        if (userRepository.existsByEmail(email)) {
+            throw new UserAlreadyExistsException("A user is already registered with that email address.");
         }
-        throw new UserAlreadyExistsException("User already exists");
-//        return null;
-    }
-
-    @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) {
-        OAuth2User oAuth2User = super.loadUser(userRequest);
-        String email = oAuth2User.getAttribute("email");
-
-        if (email != null && userRepository.findByEmail(email).isEmpty()) {
-            User newUser = new User(email, oAuth2User.getName(), oAuth2User.getName(), passwordEncoder.encode(UUID.randomUUID().toString()));
-            newUser.getRoles().add(getOrCreateDefaultRole());
-            userRepository.save(newUser);
-        }
-        return oAuth2User;
-    }
-
-    public List<User> getUsers() {
-        List<User> users = userRepository.findAll();
-        if(users.isEmpty()){
-            throw new UserNotFoundException("No registered users yet.");
-        }
-        return users;
-    }
-
-    public UserDto getUserDTOByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .map(UserMapper::toDTO)
-                .orElseThrow(() -> new UserNotFoundException("No registered user with that username."));
-    }
-
-    public UserDto getUserDTOById(Integer id) {
-        return userRepository.findById(id)
-                .map(UserMapper::toDTO)
-                .orElseThrow(() -> new UserNotFoundException("No registered user with that ID."));
-    }
-
-    public UserDto getUserDTOByEmail(String email){
-        System.out.println("getUserDTOByEmail: SEARCHING FOR EMAIL IN DB = " + email);
-        Optional<User> u = userRepository.findByEmail(email);
-        if(u.isPresent()){
-            System.out.println("FOUND USER = "+u);
-            return UserMapper.toDTO(u.get());
-        }
-        throw new UserNotFoundException("No registered user with that email.");
-    }
-
-
-    public boolean authenticateUser(String email, String password){
-        Optional<User> optionalUser = userRepository.findByEmail(email);;
-        if(optionalUser.filter(value ->  passwordEncoder.matches(password, value.getPassword())).isPresent()){
-
-            Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            optionalUser.get().getUsername(),
-                            password,
-                            getUserAuthorities(optionalUser.get())));
-
-            SecurityContext sc  = SecurityContextHolder.getContext();
-            sc.setAuthentication(auth);
-
-            return auth.isAuthenticated();
-        }
-        return false;
-    }
-
-    private List<GrantedAuthority> getUserAuthorities(User user) {;
-        return user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
-                .collect(Collectors.toList());
-    }
-
-    private void validateUserDTO(UserDto userDTO){
-        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDTO);
-        if (!violations.isEmpty()) {
-            String errorMessage = violations.stream()
-                    .map(ConstraintViolation::getMessage)
-                    .collect(Collectors.joining(", "));
-            throw new InvalidUserInputException(errorMessage, violations);
-        }
-    }
-
-    private void checkUsernameAvailability(UserDto userDTO) {
-        if(userRepository.findByUsername(userDTO.getUsername()).isPresent()){
+        if (userRepository.existsByUsername(username)) {
             throw new UserAlreadyExistsException("A user is already registered with that username.");
         }
+
+        User user = new User(
+                email,
+                username,
+                request.name().trim(),
+                passwordEncoder.encode(request.password())
+        );
+        user.getRoles().add(getOrCreateDefaultRole());
+        return userRepository.save(user);
     }
 
-    private User addDefaultRoleToUser(User u) {
-        u.getRoles().add(getOrCreateDefaultRole());
-        return u;
+    @Transactional
+    public User provisionOidcUser(String emailClaim, String nameClaim) {
+        String email = normalizeEmail(emailClaim);
+        return userRepository.findByEmail(email).orElseGet(() -> {
+            String username = uniqueUsernameFor(email);
+            String displayName = nameClaim == null || nameClaim.isBlank() ? username : nameClaim.trim();
+            User user = new User(email, username, displayName, null);
+            user.getRoles().add(getOrCreateDefaultRole());
+            return userRepository.save(user);
+        });
+    }
+
+    @Transactional(readOnly = true)
+    public User requireByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Authenticated user was not found."));
+    }
+
+    @Transactional(readOnly = true)
+    public User requireByEmail(String email) {
+        return userRepository.findByEmail(normalizeEmail(email))
+                .orElseThrow(() -> new UserNotFoundException("Authenticated user was not found."));
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse responseByUsername(String username) {
+        return UserMapper.toResponse(requireByUsername(username));
     }
 
     private Role getOrCreateDefaultRole() {
-        return roleRepository.findByName("USER")
-                .orElseGet(() -> roleRepository.save(new Role("USER")));
+        return roleRepository.findByName(DEFAULT_ROLE)
+                .orElseGet(() -> roleRepository.save(new Role(DEFAULT_ROLE)));
     }
 
+    private String uniqueUsernameFor(String email) {
+        String localPart = email.substring(0, email.indexOf('@'))
+                .toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9._-]", "-")
+                .replaceAll("-+", "-")
+                .replaceAll("^[._-]+|[._-]+$", "");
+        if (localPart.length() < 3) {
+            localPart = "user-" + localPart;
+        }
+        String base = localPart.substring(0, Math.min(localPart.length(), 16));
+        String candidate = base;
+        int suffix = 2;
+        while (userRepository.existsByUsername(candidate)) {
+            candidate = base + "-" + suffix++;
+        }
+        return candidate;
+    }
+
+    private String normalizeEmail(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
+    }
 }
