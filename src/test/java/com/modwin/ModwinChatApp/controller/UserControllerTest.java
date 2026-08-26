@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modwin.ModwinChatApp.persistence.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -16,6 +19,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -24,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ExtendWith(OutputCaptureExtension.class)
 class UserControllerTest {
 
     @Autowired
@@ -97,6 +102,32 @@ class UserControllerTest {
         mockMvc.perform(get("/api/users/me"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.detail").value("Authentication is required."));
+    }
+
+    @Test
+    void providerDiscoveryDoesNotAdvertiseUnconfiguredGoogleLogin() throws Exception {
+        mockMvc.perform(get("/api/auth/providers"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.providers.length()").value(1))
+                .andExpect(jsonPath("$.providers[0]").value("LOCAL"));
+    }
+
+    @Test
+    void authenticationRequestPasswordsAreNotLogged(CapturedOutput output) throws Exception {
+        String password = "never-log-this-password-2814";
+        CsrfSession csrf = csrfSession();
+
+        mockMvc.perform(post("/api/auth/login")
+                        .session(csrf.session())
+                        .header(csrf.headerName(), csrf.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "missing@example.com",
+                                "password", password
+                        ))))
+                .andExpect(status().isUnauthorized());
+
+        assertThat(output.getAll()).doesNotContain(password);
     }
 
     @Test
