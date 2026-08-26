@@ -37,4 +37,3 @@ build/
 AGENTS.md
 /CONTEXT_GUIDE.md
 /docker-compose.override.yml
-/.env.example

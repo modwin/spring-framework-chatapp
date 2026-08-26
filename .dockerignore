@@ -1,0 +1,12 @@
+.git
+.github
+.idea
+.env
+**/.env*
+**/application-local.yml
+**/application-*.local.yml
+*.iml
+target
+frontend
+docs
+*.md
