@@ -1,0 +1,13 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/chat_application}
+    username: ${DATABASE_USERNAME:chat_app}
+    password: ${DATABASE_PASSWORD:chat_app}
+
+logging:
+  level:
+    root: INFO
