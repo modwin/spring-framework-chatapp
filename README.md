@@ -40,7 +40,7 @@ The checked-in defaults are intended only for local development. Copy `.env.exam
 Set these values in `.env`:
 
 ```dotenv
-SPRING_PROFILES_ACTIVE=oauth
+SPRING_PROFILES_ACTIVE=docker,oauth
 GOOGLE_CLIENT_ID=your-client-id
 GOOGLE_CLIENT_SECRET=your-client-secret
 FRONTEND_URL=http://localhost:3000
@@ -48,13 +48,26 @@ FRONTEND_URL=http://localhost:3000
 
 Configure the provider callback as `http://localhost:3000/login/oauth2/code/google`. Nginx forwards that route to Spring Security.
 
+The `oauth` profile fails fast when either Google credential is absent. Without that profile, the API and UI advertise local login only. Never place real credentials in `application*.yml` or build them into a container image.
+
 ## Run during development
 
-Start PostgreSQL first (the Compose database service is sufficient), then run the backend with Java 21:
+Start PostgreSQL first (the Compose database service is sufficient), then run the backend with Java 21 and the explicit `dev` profile:
 
 ```bash
-./mvnw spring-boot:run
+docker compose up -d database
+SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
 ```
+
+PowerShell equivalent:
+
+```powershell
+docker compose up -d database
+$env:SPRING_PROFILES_ACTIVE = "dev"
+.\mvnw.cmd spring-boot:run
+```
+
+The development profile connects to PostgreSQL at `localhost:5432` using the local-only Compose defaults. If you override the database credentials, export matching `DATABASE_USERNAME` and `DATABASE_PASSWORD` values before starting Spring Boot.
 
 In a second terminal:
 
@@ -70,13 +83,14 @@ The Vite development server proxies backend routes to port `8081`.
 
 ```bash
 ./mvnw test
+./mvnw -Ppostgres-it verify
 cd frontend
 npm run lint
 npm test
 npm run build
 ```
 
-The PostgreSQL migration test runs when Docker is available and is skipped otherwise. The remaining backend tests use an isolated H2 database.
+The fast backend tests use an isolated H2 database. The `postgres-it` profile is the authoritative Flyway/PostgreSQL verification and intentionally fails when Docker is unavailable; CI always runs it. GitHub Actions also builds both container images and smoke-tests the Compose stack, but does not publish or deploy images.
 
 ## API summary
 
