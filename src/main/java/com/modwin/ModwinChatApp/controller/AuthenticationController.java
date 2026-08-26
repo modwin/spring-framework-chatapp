@@ -4,11 +4,11 @@ import com.modwin.ModwinChatApp.dto.AuthProvidersResponse;
 import com.modwin.ModwinChatApp.dto.LoginRequest;
 import com.modwin.ModwinChatApp.dto.RegisterUserRequest;
 import com.modwin.ModwinChatApp.dto.UserResponse;
+import com.modwin.ModwinChatApp.security.OAuthProviderAvailability;
 import com.modwin.ModwinChatApp.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,21 +25,21 @@ import java.util.Set;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
-    private final boolean googleEnabled;
+    private final OAuthProviderAvailability oauthProviderAvailability;
 
     public AuthenticationController(
             AuthenticationService authenticationService,
-            @Value("${app.auth.google-enabled:false}") boolean googleEnabled
+            OAuthProviderAvailability oauthProviderAvailability
     ) {
         this.authenticationService = authenticationService;
-        this.googleEnabled = googleEnabled;
+        this.oauthProviderAvailability = oauthProviderAvailability;
     }
 
     @GetMapping("/providers")
     public AuthProvidersResponse providers() {
         Set<String> providers = new LinkedHashSet<>();
         providers.add("LOCAL");
-        if (googleEnabled) {
+        if (oauthProviderAvailability.isGoogleConfigured()) {
             providers.add("GOOGLE");
         }
         return new AuthProvidersResponse(providers);
