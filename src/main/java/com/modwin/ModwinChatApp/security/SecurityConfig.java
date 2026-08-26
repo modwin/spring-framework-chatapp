@@ -20,7 +20,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -32,19 +31,16 @@ public class SecurityConfig {
 
     private final ObjectProvider<CustomOidcUserService> customOidcUserService;
     private final LocalUserDetailsService userDetailsService;
-    private final ObjectProvider<ClientRegistrationRepository> clientRegistrations;
-    private final boolean googleEnabled;
+    private final OAuthProviderAvailability oauthProviderAvailability;
     private final String frontendUrl;
 
     public SecurityConfig(ObjectProvider<CustomOidcUserService> customOidcUserService,
                           LocalUserDetailsService userDetailsService,
-                          ObjectProvider<ClientRegistrationRepository> clientRegistrations,
-                          @Value("${app.auth.google-enabled:false}") boolean googleEnabled,
+                          OAuthProviderAvailability oauthProviderAvailability,
                           @Value("${app.frontend-url:http://localhost:3000}") String frontendUrl) {
         this.customOidcUserService = customOidcUserService;
         this.userDetailsService = userDetailsService;
-        this.clientRegistrations = clientRegistrations;
-        this.googleEnabled = googleEnabled;
+        this.oauthProviderAvailability = oauthProviderAvailability;
         this.frontendUrl = frontendUrl;
     }
 
@@ -109,7 +105,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 );
 
-        if (googleEnabled && clientRegistrations.getIfAvailable() != null) {
+        if (oauthProviderAvailability.isGoogleConfigured()) {
             http.oauth2Login(oauth -> oauth
                     .defaultSuccessUrl(frontendUrl, true)
                     .userInfoEndpoint(userInfo -> userInfo.oidcUserService(customOidcUserService.getObject()))
