@@ -133,7 +133,7 @@ function App() {
             <section className="hero-copy">
               <p className="eyebrow">Accounts and friendships</p>
               <h1>Build your trusted circle.</h1>
-              <p>Sign in securely, connect with registered users, and manage pending friendship requests. Messaging is the next planned milestone.</p>
+              <p>Sign in securely, either with a Google account or a locally registered account. Connect with users, make create friendships and chat.</p>
               <ul>
                 <li>Session-based Spring Security</li>
                 <li>Local accounts and optional Google sign-in</li>

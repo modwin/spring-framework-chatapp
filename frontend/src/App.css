@@ -78,8 +78,8 @@ main {
 .guest-grid,
 .dashboard-grid {
   display: grid;
-  align-items: center;
-  grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.9fr);
+  align-items: start;
+  grid-template-columns: minmax(0px, 1.1fr) minmax(340px, 0.9fr);
   gap: clamp(42px, 7vw, 96px);
 }
 

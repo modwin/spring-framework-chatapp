@@ -3,8 +3,7 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-.env.example
-
+.env
 ### STS ###
 .apt_generated
 .classpath
@@ -20,8 +19,7 @@ target/
 *.iml
 *.ipr
 .env
-.env.*
-!.env.example
+!.env
 
 ### NetBeans ###
 /nbproject/private/
@@ -38,3 +36,4 @@ build/
 AGENTS.md
 /CONTEXT_GUIDE.md
 /docker-compose.override.yml
+/.env

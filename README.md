@@ -33,7 +33,7 @@ docker compose up --build
 
 Open <http://localhost:3000>. PostgreSQL data is retained in the `postgres-data` volume. The backend is reachable through Nginx rather than published directly.
 
-The checked-in defaults are intended only for local development. Copy `.env.example` to `.env` to override them. Do not use the default database password outside a local machine.
+The checked-in defaults are intended only for local development. Copy `.env` to `.env` to override them. Do not use the default database password outside a local machine.
 
 ### Optional Google login
 
@@ -67,7 +67,7 @@ $env:SPRING_PROFILES_ACTIVE = "dev"
 .\mvnw.cmd spring-boot:run
 ```
 
-The development profile connects to PostgreSQL at `localhost:5432` using the local-only Compose defaults. If you override the database credentials, export matching `DATABASE_USERNAME` and `DATABASE_PASSWORD` values before starting Spring Boot.
+The development profile connects to PostgreSQL at `localhost:5433` using the local-only Compose defaults. If you override the database credentials, export matching `DATABASE_USERNAME` and `DATABASE_PASSWORD` values before starting Spring Boot.
 
 In a second terminal:
 

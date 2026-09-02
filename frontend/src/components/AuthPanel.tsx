@@ -8,7 +8,7 @@ interface AuthPanelProps {
   onRegister: (request: RegisterUserRequest) => Promise<void>
 }
 
-export function AuthPanel({ busy, googleEnabled, onLogin, onRegister }: AuthPanelProps) {
+export function AuthPanel({ busy,googleEnabled, onLogin, onRegister }: AuthPanelProps) {
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -66,10 +66,10 @@ export function AuthPanel({ busy, googleEnabled, onLogin, onRegister }: AuthPane
         </button>
 
         {googleEnabled && (
-          <>
-            <div className="divider"><span>or</span></div>
-            <a className="btn btn-secondary" href="/oauth2/authorization/google">Continue with Google</a>
-          </>
+            <>
+              <div className="divider"><span>or</span></div>
+              <a className="btn btn-secondary" href="/oauth2/authorization/google">Continue with Google</a>
+            </>
         )}
       </form>
     </div>

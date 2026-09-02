@@ -17,11 +17,11 @@ export default defineConfig({
       },
       '/oauth2': {
         target: 'http://localhost:8081',
-        changeOrigin: true,
+        changeOrigin: true
       },
       '/login': {
         target: 'http://localhost:8081',
-        changeOrigin: true,
+        changeOrigin: true
       }
     }
   }
