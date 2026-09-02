@@ -1,3 +1,4 @@
+-- $$
 DO $$
 BEGIN
     IF EXISTS (
@@ -11,11 +12,12 @@ BEGIN
     END IF;
 END
 $$;
+-- ;
 
 DROP INDEX IF EXISTS uk_friendship_pair;
 
 CREATE UNIQUE INDEX uk_friendship_pair
     ON friendship (
-        LEAST(requester_id, recipient_id),
-        GREATEST(requester_id, recipient_id)
-    );
+                   LEAST(requester_id, recipient_id),
+                   GREATEST(requester_id, recipient_id)
+        );
