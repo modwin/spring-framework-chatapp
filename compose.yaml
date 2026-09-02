@@ -23,7 +23,7 @@ services:
       context: .
     restart: unless-stopped
     environment:
-      DATABASE_URL: jdbc:postgresql://database:5433/${POSTGRES_DB:-chat_application}
+      DATABASE_URL: jdbc:postgresql://database:5432/${POSTGRES_DB:-chat_application}
       DATABASE_USERNAME: ${POSTGRES_USER:-chat_app}
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-chat_app}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}

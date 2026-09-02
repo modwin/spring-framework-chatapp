@@ -1,4 +1,9 @@
 spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/chat_application}
+    username: ${DATABASE_USERNAME:chat_app}
+    password: ${DATABASE_PASSWORD:chat_app}
   application:
     name: ModwinChatApp
   jpa:
@@ -21,6 +26,5 @@ management:
     health:
       probes:
         enabled: true
-
 app:
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
